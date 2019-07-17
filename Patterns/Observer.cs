@@ -5,23 +5,73 @@ using System.Text;
 
 namespace Patterns
 {
-    //шаблон проектирования, который использует отношение "один ко многим".
-    //В этом отношении есть один наблюдаемый объект и множество наблюдателей.
-    //И при изменении наблюдаемого объекта автоматически происходит оповещение всех наблюдателей.
+    ////шаблон проектирования, который использует отношение "один ко многим".
+    ////В этом отношении есть один наблюдаемый объект и множество наблюдателей.
+    ////И при изменении наблюдаемого объекта автоматически происходит оповещение всех наблюдателей.
+    
+    //interface IObservable
+    //{
+    //    void AddObserver(IObserver o);
+    //    void RemoveObserver(IObserver o);
+    //    void NotifyObservers();
+    //}
+    //class ConcreteObservable : IObservable
+    //{
+    //    private List<IObserver> observers;
+    //    public ConcreteObservable()
+    //    {
+    //        observers = new List<IObserver>();
+    //    }
+    //    public void AddObserver(IObserver o)
+    //    {
+    //        observers.Add(o);
+    //    }
+    //    public void RemoveObserver(IObserver o)
+    //    {
+    //        observers.Remove(o);
+    //    }
+    //    public void NotifyObservers()
+    //    {
+    //        foreach (IObserver observer in observers)
+    //            observer.Update();
+    //    }
+    //}
+    //interface IObserver
+    //{
+    //    void Update();
+    //}
+    //class ConcreteObserver : IObserver
+    //{
+    //    public void Update()
+    //    {
+    //    }
+    //}
+
+
+
+    interface IObserver
+    {
+        void Update(Object ob);
+    }
+
     interface IObservable
     {
-        void AddObserver(IObserver o);
+        void RegisterObserver(IObserver o);
         void RemoveObserver(IObserver o);
         void NotifyObservers();
     }
-    class ConcreteObservable : IObservable
+
+    class Stock : IObservable
     {
-        private List<IObserver> observers;
-        public ConcreteObservable()
+        StockInfo sInfo; // информация о торгах
+
+        List<IObserver> observers;
+        public Stock()
         {
             observers = new List<IObserver>();
+            sInfo = new StockInfo();
         }
-        public void AddObserver(IObserver o)
+        public void RegisterObserver(IObserver o)
         {
             observers.Add(o);
         }
@@ -33,19 +83,71 @@ namespace Patterns
 
         public void NotifyObservers()
         {
-            foreach (IObserver observer in observers)
-                observer.Update();
+            foreach (IObserver o in observers)
+            {
+                o.Update(sInfo);
+            }
+        }
+
+        public void Market()
+        {
+            Random rnd = new Random();
+            sInfo.USD = rnd.Next(20, 40);
+            sInfo.Euro = rnd.Next(30, 50);
+            NotifyObservers();
         }
     }
 
-    interface IObserver
+    class StockInfo
     {
-        void Update();
+        public int USD { get; set; }
+        public int Euro { get; set; }
     }
-    class ConcreteObserver : IObserver
+
+    class Broker : IObserver
     {
-        public void Update()
+        public string Name { get; set; }
+        IObservable stock;
+        public Broker(string name, IObservable obs)
         {
+            this.Name = name;
+            stock = obs;
+            stock.RegisterObserver(this);
+        }
+        public void Update(object ob)
+        {
+            StockInfo sInfo = (StockInfo)ob;
+
+            if (sInfo.USD > 30)
+                Console.WriteLine("Брокер {0} продает доллары;  Курс доллара: {1}", this.Name, sInfo.USD);
+            else
+                Console.WriteLine("Брокер {0} покупает доллары;  Курс доллара: {1}", this.Name, sInfo.USD);
+        }
+        public void StopTrade()
+        {
+            stock.RemoveObserver(this);
+            stock = null;
+        }
+    }
+
+    class Bank : IObserver
+    {
+        public string Name { get; set; }
+        IObservable stock;
+        public Bank(string name, IObservable obs)
+        {
+            this.Name = name;
+            stock = obs;
+            stock.RegisterObserver(this);
+        }
+        public void Update(object ob)
+        {
+            StockInfo sInfo = (StockInfo)ob;
+
+            if (sInfo.Euro > 40)
+                Console.WriteLine("Банк {0} продает евро;  Курс евро: {1}", this.Name, sInfo.Euro);
+            else
+                Console.WriteLine("Банк {0} покупает евро;  Курс евро: {1}", this.Name, sInfo.Euro);
         }
     }
 
