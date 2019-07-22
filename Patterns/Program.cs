@@ -106,6 +106,14 @@ namespace Patterns
 
 
 
+            //State
+            Water water = new Water(new LiquidWaterState());
+            water.Heat();
+            water.Frost();
+            water.Frost();
+
+            Console.Read();
+
         }
     }
 }

@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AbstractFactory.cs" />
     <Compile Include="Builder.cs" />
+    <Compile Include="ChainOfResponsibility.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="FactoryMethod.cs" />
     <Compile Include="Iterator.cs" />
